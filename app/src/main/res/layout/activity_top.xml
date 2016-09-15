@@ -4,17 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.zhubingning.timecontrol.TopActivity">
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </android.support.v7.widget.Toolbar>
 
     <RelativeLayout
         android:id="@+id/layout_countdown"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:layout_below="@id/toolbar"
         android:gravity="center"
         android:padding="8dp">
 
@@ -30,7 +24,7 @@
     </RelativeLayout>
 
     <Button
-        android:id="@+id/button_pause"
+        android:id="@+id/button_pause_focus"
         android:layout_below="@id/layout_countdown"
         android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"

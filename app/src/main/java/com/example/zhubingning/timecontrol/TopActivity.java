@@ -1,8 +1,8 @@
 package com.example.zhubingning.timecontrol;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.ActionBar;
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -13,12 +13,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class TopActivity extends AppCompatActivity {
+public class TopActivity extends Activity {
     
     //bind
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
-    @BindView(R.id.button_pause)
+    @BindView(R.id.button_pause_focus)
     Button mButtonPause;
     @BindView(R.id.button_continue)
     Button mButtonContinue;
@@ -36,6 +34,7 @@ public class TopActivity extends AppCompatActivity {
     TextView mTextCountdown;
 
     private InstanceCountdownTimer mTimer;
+    private ActionBar mActionBar;
 
     ////////////////////////////////////////////////////////////
     // EVENT METHODS
@@ -46,13 +45,27 @@ public class TopActivity extends AppCompatActivity {
         showBeingForcus();
     }
 
+    @OnClick(R.id.button_pause_focus)
+    public void onClickPauseFocus(){
+        showPauseForcus();
+    }
+
+    @OnClick(R.id.button_continue)
+    public void onClickContinue(){
+        showResumeForcus();
+    }
+
+    @OnClick(R.id.button_exit)
+    public void onClickExit(){
+        showFinishForcus();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top);
         ButterKnife.bind(this);
-       // ButterKnife.setDebug(true);
 
         initialViews();
     }
@@ -62,27 +75,39 @@ public class TopActivity extends AppCompatActivity {
     ///////////////////////////////////////////////////////////
 
     public void initialViews(){
-        //mToolbar.setTitle("Focus");
+
         showStartForcus();
     }
 
     private void showStartForcus(){
+        mActionBar=getActionBar();
+        mActionBar.setTitle("Focus");
         mButtonStartFocus.setVisibility(View.VISIBLE);
         mTextCountdown.setText("25:00");
     }
 
     private void showBeingForcus(){
         mButtonStartFocus.setVisibility(View.GONE);
-        mLayoutContinueExit.setVisibility(View.VISIBLE);
+        mButtonPause.setVisibility(View.VISIBLE);
         mTimer=new InstanceCountdownTimer(1500000,1000,mTextCountdown);
-
+        mTimer.start();
     }
 
     private void showPauseForcus(){
+        mTimer.onPause();
+        mButtonPause.setVisibility(View.GONE);
+        mLayoutContinueExit.setVisibility(View.VISIBLE);
+    }
 
+    private void showResumeForcus(){
+        mLayoutContinueExit.setVisibility(View.GONE);
+        mButtonPause.setVisibility(View.VISIBLE);
+        mTimer.onResume();
     }
 
     private void showFinishForcus(){
-
+        mTimer.onFinish();
+        mLayoutContinueExit.setVisibility(View.GONE);
+        showStartForcus();
     }
 }

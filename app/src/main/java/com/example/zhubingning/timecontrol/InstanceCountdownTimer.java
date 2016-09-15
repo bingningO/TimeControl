@@ -40,8 +40,15 @@ public class InstanceCountdownTimer extends CountDownTimer {
     @Override
     public void onTick(long millisUntilFinished) {
         this.millisUntilFinished=millisUntilFinished;
-        long minutes=millisUntilFinished/60;
-        long seconds=millisUntilFinished-minutes*60;
+        long totoleSeconds=millisUntilFinished/1000;
+        String minutes=(totoleSeconds/60)+"";
+        String seconds=(totoleSeconds%60)+"";
+        if(minutes.length()==1){
+            minutes="0"+minutes;
+        }
+        if(seconds.length()==1){
+            seconds="0"+seconds;
+        }
         showTimer.setText(minutes+":"+seconds);
     }
 
