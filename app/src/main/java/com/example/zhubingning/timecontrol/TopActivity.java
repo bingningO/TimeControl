@@ -14,7 +14,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class TopActivity extends Activity {
-    
+
     //bind
     @BindView(R.id.button_pause_focus)
     Button mButtonPause;
@@ -32,32 +32,49 @@ public class TopActivity extends Activity {
     LinearLayout mLayoutStatistics;
     @BindView(R.id.countdown_text)
     TextView mTextCountdown;
+    @BindView(R.id.text_completed)
+    TextView mTextCompleted;
+    @BindView(R.id.text_goal)
+    TextView mTextGoal;
 
-    private InstanceCountdownTimer mTimer;
+    private CustomCountDownTimer mTimerCustom;
     private ActionBar mActionBar;
+    private int mCompletTime;
+    private int mGoalTime;
+    private boolean mIsFocus;
+    private boolean mIsNatureOnfinish;
+    private long mfocusTime = 60000;
+    private long mbreakTime = 3000;
 
     ////////////////////////////////////////////////////////////
     // EVENT METHODS
     ///////////////////////////////////////////////////////////
 
     @OnClick(R.id.button_start_focus)
-    public void onClickStartFocus(){
-        showBeingForcus();
+    public void onClickStartFocus() {
+        long countTime = mIsFocus ? mfocusTime : mbreakTime;
+        inCounting(countTime);
     }
 
     @OnClick(R.id.button_pause_focus)
-    public void onClickPauseFocus(){
-        showPauseForcus();
+    public void onClickPauseFocus() {
+        showPause();
     }
 
     @OnClick(R.id.button_continue)
-    public void onClickContinue(){
-        showResumeForcus();
+    public void onClickContinue() {
+        showResume();
     }
 
     @OnClick(R.id.button_exit)
-    public void onClickExit(){
-        showFinishForcus();
+    public void onClickExit() {
+        mIsNatureOnfinish=false;
+        mTimerCustom.onFinish();
+        mTimerCustom.cancel();
+        mLayoutContinueExit.setVisibility(View.GONE);
+
+        mIsFocus = true;
+        showStart(mfocusTime);
     }
 
 
@@ -74,40 +91,90 @@ public class TopActivity extends Activity {
     // PRIVATE METHODS
     ///////////////////////////////////////////////////////////
 
-    public void initialViews(){
+    private void initialViews() {
+        setmGoalTime(180);
+        setmCompletTime(0);
+        mTextCompleted.setText(getResources().getString(R.string.time_completed) + " " + mCompletTime);
+        mTextGoal.setText(getResources().getString(R.string.time_goal) + " " + mGoalTime);
 
-        showStartForcus();
+        mIsFocus = true;
+        showStart(mfocusTime);
     }
 
-    private void showStartForcus(){
-        mActionBar=getActionBar();
-        mActionBar.setTitle("Focus");
+    /**
+     * show screens
+     **/
+    private void showStart(long timeMillis) {
+        mActionBar = getActionBar();
+        mIsNatureOnfinish=true;
+
+        String title = mIsFocus ? "Focus" : "Take a Break";
+        mActionBar.setTitle(title);
         mButtonStartFocus.setVisibility(View.VISIBLE);
-        mTextCountdown.setText("25:00");
+        setShowTimeText(timeMillis);
     }
 
-    private void showBeingForcus(){
+    private void inCounting(long countTime) {
         mButtonStartFocus.setVisibility(View.GONE);
         mButtonPause.setVisibility(View.VISIBLE);
-        mTimer=new InstanceCountdownTimer(1500000,1000,mTextCountdown);
-        mTimer.start();
+        mTimerCustom = new CustomCountDownTimer(countTime, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                setShowTimeText(millisUntilFinished);
+            }
+
+            @Override
+            public void onFinish() {
+                if (mIsNatureOnfinish && mIsFocus) {
+                    mCompletTime += mTimerCustom.getCountTimes() / 60000;
+                    mTextCompleted.setText(getResources().getString(R.string.time_completed) + mCompletTime);
+                }
+                if (mIsFocus) {
+                    mIsFocus = false;
+                    showStart(mbreakTime);
+                } else {
+                    mIsFocus = true;
+                    showStart(mfocusTime);
+                }
+            }
+        }.start();
     }
 
-    private void showPauseForcus(){
-        mTimer.onPause();
+    private void showPause() {
+        String exitText = mIsFocus ? "Exit" : "Skip";
         mButtonPause.setVisibility(View.GONE);
         mLayoutContinueExit.setVisibility(View.VISIBLE);
+        mButtonExit.setText(exitText);
+        mTimerCustom.pause();
     }
 
-    private void showResumeForcus(){
+    private void showResume() {
         mLayoutContinueExit.setVisibility(View.GONE);
         mButtonPause.setVisibility(View.VISIBLE);
-        mTimer.onResume();
+        mTimerCustom.resume();
     }
 
-    private void showFinishForcus(){
-        mTimer.onFinish();
-        mLayoutContinueExit.setVisibility(View.GONE);
-        showStartForcus();
+    /**
+     * small functional methods
+     **/
+    private void setmCompletTime(int completTime) {
+        mCompletTime = completTime;
     }
+
+    private void setmGoalTime(int goalTime) {
+        mGoalTime = goalTime;
+    }
+
+    private void setShowTimeText(long timeMill) {
+        String minutes = (timeMill / 1000 / 60) + "";
+        String seconds = (timeMill / 1000 % 60) + "";
+        if (minutes.length() == 1) {
+            minutes = "0" + minutes;
+        }
+        if (seconds.length() == 1) {
+            seconds = "0" + seconds;
+        }
+        mTextCountdown.setText(minutes + ":" + seconds);
+    }
+
 }

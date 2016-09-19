@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">TimeControl</string>
+    <string name="time_completed">Completed: </string>
+    <string name="time_goal">Goal: </string>
 </resources>
